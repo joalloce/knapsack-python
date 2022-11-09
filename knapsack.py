@@ -19,15 +19,16 @@ class Knapsack():
         self.maxWeight = maxWeight
         self.numIterations = numIterations
 
-    #
+    # for testing. prints variables
     def printParams(self):
-        print(self.weights)
-        print(self.profits)
-        print(self.populationSize)
-        print(self.maxWeight)
-        print(self.numIterations)
-        print(self.population)
+        print("weights", self.weights)
+        print("profit", self.profits)
+        print("populationSize", self.populationSize)
+        print("maxWeight", self.maxWeight)
+        print("numIterations", self.numIterations)
+        print("population", self.population)
 
+    # calculate the total profit of a sample
     def computeProfit(self, sample):
         totalProfit = 0
         for i in range(len(self.profits)):
@@ -36,6 +37,7 @@ class Knapsack():
 
         return totalProfit
 
+    # calculate the total weight of a sample
     def computeWeight(self, sample):
         totalWeight = 0
         for i in range(len(self.weights)):
@@ -44,6 +46,7 @@ class Knapsack():
 
         return totalWeight
 
+    # create an inital population randomly
     def createPopulationRandomly(self):
         self.population = []
         for i in range(self.populationSize):
@@ -52,6 +55,7 @@ class Knapsack():
                 sample.append(random.randint(0, 1))
             self.population.append(sample)
 
+    # change population 0.2%
     def mutation(self):
         for i in range(self.populationSize):
             for j in range(len(self.weights)):
@@ -62,6 +66,64 @@ class Knapsack():
                     else:
                         self.population[i][j] = 1
 
+    # check if samples are ok
+    def fitness(self):
+        for i in range(self.populationSize):
+            sample = self.population[i]
+            totalWeight = self.computeWeight(sample)
+            while totalWeight > self.maxWeight:  # remove an item randomly until it fits
+                k = random.randint(0, len(self.weights)-1)
+                while sample[k] != 1:
+                    k = random.randint(0, len(self.weights)-1)
+                sample[k] = 0
+                totalWeight = self.computeWeight(sample)
+            self.population[i] = sample
+
+    # Select half of the population
+    def selection(self):
+        newPopulation = []
+        self.sortPopulation()
+
+        # Elitism Selection. 2 selected
+        self.populationAfterSelection = self.population.copy()
+        best = self.populationAfterSelection[0]
+        del self.populationAfterSelection[0]
+        secondBest = self.populationAfterSelection[0]
+        del self.populationAfterSelection[0]
+
+        newPopulation.append(best)
+        newPopulation.append(secondBest)
+
+        # Roulette Wheel Selection
+        samplesToSelect = int((len(self.population) / 2) - 2)  # half minus 2
+
+        totalProfit = 0
+        popProfits = []
+        for i in range(len(self.populationAfterSelection)):
+            profit = self.computeProfit(self.populationAfterSelection[i])
+            totalProfit += profit
+            popProfits.append(profit)
+
+        # pick 1 sample randomly based on its profit
+        for i in range(samplesToSelect):
+            randomProfit = random.randint(1, totalProfit)
+            j = -1
+            while randomProfit > 0:
+                randomProfit -= popProfits[j]
+                j += 1
+            newPopulation.append(self.populationAfterSelection[j])
+
+        self.populationAfterSelection = newPopulation
+
+    def crossover(self):
+        newPopulation = []
+
+    def sortPopulation(self):
+        self.population.sort(key=self.compare, reverse=True)
+
+    def compare(self, sample):
+        return self.computeProfit(sample)
+
     #
     def _testing(self):
         print(self.computeProfit(self.population[0]))
@@ -71,18 +133,16 @@ class Knapsack():
 weights = [2, 3, 1, 4]
 profits = [1, 4, 2, 6]
 numIterations = 4
-populationSize = 6
-maxWeight = 15
+populationSize = 14
+maxWeight = 10
 
 instance = Knapsack()
 instance.setParams(weights, profits, populationSize, maxWeight, numIterations)
 # instance.start()
-instance.printParams()
 
 instance.createPopulationRandomly()
-
 instance.printParams()
-instance._testing()
 
-instance.mutation()
+instance.selection()
+
 instance.printParams()
