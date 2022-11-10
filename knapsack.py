@@ -18,16 +18,6 @@ class Knapsack():
         self.maxWeight = maxWeight
         self.numIterations = numIterations
 
-    # for testing. prints variables
-    def printParams(self):
-        print("weights", self.weights)
-        print("profit", self.profits)
-        print("populationSize", self.populationSize)
-        print("maxWeight", self.maxWeight)
-        print("numIterations", self.numIterations)
-        print("populationAF", self.populationAfterSelection)
-        print("population", self.population)
-
     # calculate the total profit of a sample
     def computeProfit(self, sample):
         totalProfit = 0
@@ -120,6 +110,7 @@ class Knapsack():
 
         self.populationAfterSelection = newPopulation
 
+    # crossover 85% of the selected with 50% pop and 50% with another selected, the other 15% go through (7.5% each selected and pop)
     def crossover(self):
         newPopulation = []
         for i in range(self.populationSize):
@@ -129,13 +120,15 @@ class Knapsack():
                 sample1 = self.populationAfterSelection[random.randint(
                     0, len(self.populationAfterSelection)-1)]
                 sample2 = []
-                if random.randint(0, 1) == 1:
+                if random.randint(0, 1) == 1:  # crossover with population
                     randomPos = random.randint(0, self.populationSize-1)
                     sample2 = self.population[randomPos]
-                else:
+                else:  # crossover with selected
                     randomPos = random.randint(
                         0, len(self.populationAfterSelection)-1)
                     sample2 = self.populationAfterSelection[randomPos]
+
+                # crossover
                 newSample = []
                 for j in range(0, threshold):
                     newSample.append(sample1[j])
@@ -145,14 +138,15 @@ class Knapsack():
 
                 newPopulation.append(newSample)
             else:
-                if random.randint(0, 1) == 1:
+                if random.randint(0, 1) == 1:  # population
                     randomPos = random.randint(0, self.populationSize-1)
                     newPopulation.append(self.population[randomPos])
-                else:
+                else:  # selected
                     randomPos = random.randint(
                         0, len(self.populationAfterSelection)-1)
                     newPopulation.append(
                         self.populationAfterSelection[randomPos])
+
         self.population = newPopulation
 
     # check if 90% of the pop have the same profit
@@ -201,6 +195,16 @@ class Knapsack():
 
     def compare(self, sample):
         return self.computeProfit(sample)
+
+    # for testing. prints variables
+    def printParams(self):
+        print("weights", self.weights)
+        print("profit", self.profits)
+        print("populationSize", self.populationSize)
+        print("maxWeight", self.maxWeight)
+        print("numIterations", self.numIterations)
+        print("populationAF", self.populationAfterSelection)
+        print("population", self.population)
 
 
 numIterations = 800
